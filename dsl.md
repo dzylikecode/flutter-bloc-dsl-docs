@@ -48,7 +48,7 @@ final class _Ticked extends Event {
 
 ## bloc
 
-尽量一行来表达分支意思，都要是state，然后副作用用 & 标注
+尽量一行来表达分支意思，都要发送一个状态state（有点类似Markov矩阵），然后副作用用 & 标注
 
 ```
 bloc
@@ -183,16 +183,16 @@ test('TimerInitial equality', () {
 - 有mock依赖的时候
 
   ```
-  测试 xxxx // 让 AI 自动补全
+  xxxx // 让 AI 根据测试内容自动补全
     mock
       ticker.tick(ticks: 3) => Stream(3)
     _ --Started(3)--> RunInProgress(3)
-    called 1 ticker.tick(ticks: 3)
+    called ticker.tick(ticks: 3) == 1
   ```
 
   - mock 缩进表示进行 mock 代理
   - _ 表示初始状态
-  - called 1 xxx 表示检查函数调用
+  - called xxx == 1 表示检查函数调用次数
 
   dart 语法
 
@@ -208,6 +208,26 @@ test('TimerInitial equality', () {
     act: (bloc) => bloc.add(TimerStarted(duration: 3)),
     expect: () => [TimerRunInProgress(3)],
     verify: (_) => verify(() => ticker.tick(ticks: 3)).called(1),
+  );
+  ```
+
+- 测试链式event
+
+  ```
+  xxx
+    _  --increment--> 1 --increment--> 2
+  ```
+
+  dart 语法
+
+  ```dart
+  blocTest<CounterCubit, int>(
+    'emits [1, 2] when state is 0 and invoked twice',
+    build: CounterCubit.new,
+    act: (cubit) => cubit
+      ..increment()
+      ..increment(),
+    expect: () => const <int>[1, 2],
   );
   ```
 
